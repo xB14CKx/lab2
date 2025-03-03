@@ -3,15 +3,23 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     @vite('resources/css/customCSS.css')
 
+    <!-- Include HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+
     <div class="container mt-4">
         <div class="row">
             <!-- Left Side Form -->
             <div class="col-md-4">
-                <form id="planForm" method="POST" action="{{ route('planning.store') }}">
+                <form id="planForm" 
+                      method="POST" 
+                      action="{{ route('planning.store') }}" 
+                      hx-post="{{ route('planning.store') }}" 
+                      hx-target="#planTableBody" 
+                      hx-swap="beforeend" 
+                      hx-on::after-request="this.reset()">
                     @csrf
                     <div class="mb-3">
-                        <input type="text" name="component_name" class="form-control" placeholder="Component Name"
-                            required>
+                        <input type="text" name="component_name" class="form-control" placeholder="Component Name" required>
                     </div>
                     <div class="mb-3">
                         <input type="text" name="price" class="form-control" placeholder="Price" required>
@@ -45,48 +53,7 @@
                     </thead>
                     <tbody id="planTableBody">
                         @foreach ($planning as $plan)
-                            <tr>
-                                <td>{{ $plan->component_name }}</td>
-                                <td>{{ $plan->price }}</td>
-                                <td>{{ $plan->quantity }}</td>
-                                <td>{{ $plan->status }}</td>
-                                <td>
-                                    <!-- Dropdown for Edit/Delete -->
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle" type="button"
-                                            id="dropdownMenuButton{{ $plan->id }}" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                            &#x22EE; <!-- Three-dot icon -->
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $plan->id }}">
-                                            <li>
-                                                <a class="dropdown-item"
-                                                    href="{{ route('planning.edit', $plan->id) }}">Edit</a>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('planning.destroy', $plan->id) }}" method="POST"
-                                                    class="delete-form">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger">Delete</button>
-                                                </form>
-
-                                                <script>
-                                                    document.addEventListener('DOMContentLoaded', function () {
-                                                        document.querySelectorAll('.delete-form').forEach(form => {
-                                                            form.addEventListener('submit', function (e) {
-                                                                if (!confirm('Are you sure you want to delete this plan?')) {
-                                                                    e.preventDefault();
-                                                                }
-                                                            });
-                                                        });
-                                                    });
-                                                </script>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
+                            @include('partials.plan_row', ['plan' => $plan])
                         @endforeach
                     </tbody>
                 </table>

@@ -11,9 +11,7 @@ use Illuminate\View\View;
 
 class PlanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(): View
     {
         return view('planning.index', [
@@ -21,18 +19,7 @@ class PlanController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): View
-    {
-        return view('planning.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'component_name' => 'required|string|max:255',
@@ -40,18 +27,23 @@ class PlanController extends Controller
             'quantity' => 'required|integer',
             'status' => 'required|string|in:working,not-working,pending,purchased',
         ]);
-
+    
         $validated['user_id'] = $request->user()->id;
     
-
-        Plan::create($validated);
+        $plan = Plan::create($validated);
     
+        // If request is from HTMX, return only the new row
+        if ($request->headers->has('HX-Request')) {
+            return view('partials.plan_row', ['plan' => $plan]);
+        }
+    
+        // If not an HTMX request, redirect normally
         return redirect(route('planning.index'))->with('success', 'Plan created successfully!');
     }
+    
+    
+    
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Plan $plan): View
     {
         return view('planning.show', [
@@ -59,9 +51,7 @@ class PlanController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit($id): View
     {
         $plan = Plan::findOrFail($id);
@@ -70,9 +60,6 @@ class PlanController extends Controller
         return view('planning.edit', compact('plan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id): RedirectResponse
     {
         $plan = Plan::findOrFail($id);
@@ -90,9 +77,6 @@ class PlanController extends Controller
         return redirect(route('planning.index'))->with('success', 'Plan updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id): RedirectResponse
     {
         $plan = Plan::findOrFail($id);
