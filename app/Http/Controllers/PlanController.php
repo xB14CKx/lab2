@@ -32,12 +32,10 @@ class PlanController extends Controller
     
         $plan = Plan::create($validated);
     
-        // If request is from HTMX, return only the new row
         if ($request->headers->has('HX-Request')) {
             return view('partials.plan_row', ['plan' => $plan]);
         }
     
-        // If not an HTMX request, redirect normally
         return redirect(route('planning.index'))->with('success', 'Plan created successfully!');
     }
     
@@ -67,7 +65,7 @@ class PlanController extends Controller
 
         $validated = $request->validate([
             'component_name' => 'required|string|max:255',
-            'price' => 'required|numeric',
+            'price' => 'required|decimal:2',
             'quantity' => 'required|integer',
             'status' => 'required|string|in:working,not-working,pending,purchased',
         ]);
@@ -76,13 +74,15 @@ class PlanController extends Controller
 
         return redirect(route('planning.index'))->with('success', 'Plan updated successfully!');
     }
-
-    public function destroy($id): RedirectResponse
+    public function destroy($id)
     {
         $plan = Plan::findOrFail($id);
-    
         $plan->delete();
-        
+    
+        if (request()->header('HX-Request')) {
+            return response('')->header('Content-Type', 'text/html');
+        }
+    
         return redirect()->route('planning.index')->with('success', 'Plan deleted successfully!');
     }
 }

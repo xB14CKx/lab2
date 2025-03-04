@@ -10,22 +10,18 @@
             </button>
             <ul class="dropdown-menu">
                 <li>
-                    <a class="dropdown-item"
-                       hx-get="{{ route('planning.edit', $plan->id) }}"
-                       hx-push-url="{{ route('planning.edit', $plan->id) }}"
-                       hx-target="body"
-                       hx-swap="innerHTML">
+                    <a class="dropdown-item" hx-get="{{ route('planning.edit', $plan->id) }}"
+                        hx-push-url="{{ route('planning.edit', $plan->id) }}" hx-target="body" hx-swap="innerHTML">
                         Edit
                     </a>
                 </li>
                 <li>
-                    <form hx-delete="{{ route('planning.destroy', $plan->id) }}" 
-                          hx-target="#plan-{{ $plan->id }}" 
-                          hx-swap="outerHTML"
-                          hx-confirm="Are you sure you want to delete this plan?">
+                    <form action="{{ route('planning.destroy', $plan->id) }}" method="POST"
+                        hx-delete="{{ route('planning.destroy', $plan->id) }}" hx-target="#plan-{{ $plan->id }}"
+                        hx-swap="outerHTML">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="dropdown-item text-danger">Delete</button>
+                        <button type="submit" class="dropdown-item">Delete</button>
                     </form>
                 </li>
             </ul>
